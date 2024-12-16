@@ -1,0 +1,34 @@
+
+services:
+    mysql:
+        image: mysql:8.4.3
+        container_name: sb3t0-mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: sb3t0 # Root user's password
+            MYSQL_DATABASE: sb3t0              # Name of the database to create
+            MYSQL_USER: sb3t0                # Non-root user
+            MYSQL_PASSWORD: sb3t0        # Password for the non-root user
+        ports:
+            - "3306:3306"
+        volumes:
+            - .db/mysql:/var/lib/mysql
+            - ./docker/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+            - ./docker/init-users.sql:/docker-entrypoint-initdb.d/init-users.sql
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: sb3t0-phpmyadmin
+        environment:
+            PMA_HOST: mysql             # Link to the MySQL service
+            MYSQL_ROOT_PASSWORD: sb3t0
+            UPLOAD_LIMIT: 64M
+        ports:
+            - "9090:80"                  # Access phpMyAdmin at http://localhost:8080
+        depends_on:
+            - mysql
+volumes:
+    mysql-data:
+        driver: local
+        driver_opts:
+            type: none
+            device: .db/mysqld.cnf
+            o: bind
